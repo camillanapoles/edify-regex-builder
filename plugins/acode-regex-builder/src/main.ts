@@ -194,12 +194,13 @@ class RegexBuilderPlugin {
     this.flagI = el("input", { type: "checkbox" }) as HTMLInputElement;
     this.flagM = el("input", { type: "checkbox" }) as HTMLInputElement;
     this.flagS = el("input", { type: "checkbox" }) as HTMLInputElement;
-    for (const [box, label] of [[this.flagI, "i"], [this.flagM, "m"], [this.flagS, "s"]] as const) {
+    const flagLabel = (label: "i" | "m" | "s", box: HTMLInputElement): HTMLLabelElement => {
       box.addEventListener("change", () => this.runTester());
-      box.parentElement?.replaceWith(el("label", { class: "rb-flag" }, box, label));
-    }
+      return el("label", { class: "rb-flag" }, box, label);
+    };
     const flagsCard = el("div", { class: "rb-sec" },
-      el("span", { class: "rb-label" }, "JS flags:"), this.flagI, this.flagM, this.flagS,
+      el("span", { class: "rb-label" }, "JS flags:"),
+      flagLabel("i", this.flagI), flagLabel("m", this.flagM), flagLabel("s", this.flagS),
     );
 
     this.testInput = el("textarea", { class: "rb-input rb-test", placeholder: "test text…" });

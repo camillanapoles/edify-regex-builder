@@ -1,5 +1,9 @@
 # Changelogs
 
+## 0.1.4
+- Flag checkboxes now render with their i/m/s labels (previous release shipped
+  bare checkboxes).
+
 ## 0.1.3
 - Sidebar icon added (`icon.png`, ships in the zip) — fixes Acode's
   `Failed to resolve plugin icon` error in the sidebar.

@@ -3,7 +3,7 @@
   "id": "acode.regex-builder",
   "name": "Regex Builder",
   "main": "main.js",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "readme": "readme.md",
   "changelogs": "changelogs.md",
   "author": {
