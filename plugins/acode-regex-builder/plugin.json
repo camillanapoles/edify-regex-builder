@@ -1,0 +1,21 @@
+{
+  "$schema": "https://acode.app/schema/plugin/v0.1.0.json",
+  "id": "acode.edify.regexbuilder",
+  "name": "Regex Builder (edify)",
+  "main": "main.js",
+  "version": "0.1.0",
+  "readme": "readme.md",
+  "changelogs": "changelogs.md",
+  "author": {
+    "name": "edify contributors",
+    "email": "",
+    "github": "regex-tools/regex-builder"
+  },
+  "repository": "https://github.com/regex-tools/regex-builder",
+  "minVersionCode": 290,
+  "license": "MIT",
+  "keywords": ["regex", "builder", "edify", "tool", "tester"],
+  "price": 0,
+  "permissions": [],
+  "files": []
+}
