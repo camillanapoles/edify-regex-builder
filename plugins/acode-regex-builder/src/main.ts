@@ -51,10 +51,14 @@ function toJsCompatible(source: string): string {
     .replace(/\(\?P=([A-Za-z_][A-Za-z0-9_]*)\)/g, "\\k<$1>");
 }
 
+const STATE_KEY = "edify-rb-state";
+
 class RegexBuilderPlugin {
   private builder = new RegexBuilder();
+  private history: RegexBuilder[] = [];
   private lastGood = "";
   private presetOverride: string | null = null;
+  private saveTimer: ReturnType<typeof setTimeout> | null = null;
   private ui!: HTMLElement;
   private style!: HTMLStyleElement;
   private patternEl!: HTMLElement;
@@ -81,10 +85,13 @@ class RegexBuilderPlugin {
       this.ui.style.zIndex = "9999";
       document.body.append(this.ui);
     }
+    this.restoreState();
     this.render();
   }
 
   destroy(): void {
+    if (this.saveTimer !== null) clearTimeout(this.saveTimer);
+    this.saveTimer = null;
     this.ui?.remove();
     this.style?.remove();
   }
@@ -102,7 +109,14 @@ class RegexBuilderPlugin {
       el("div", { class: "rb-sec" },
         this.button("Copy", () => this.copy(this.currentPattern())),
         this.button("Insert", () => this.insert(this.currentPattern())),
-        this.button("Reset", () => { this.builder = new RegexBuilder(); this.presetOverride = null; this.render(); }),
+        this.button("sel ⇐", () => this.loadSelection()),
+        this.button("Reset", () => {
+          this.builder = new RegexBuilder();
+          this.presetOverride = null;
+          this.history = [];
+          this.render();
+        }),
+        this.button("Undo", () => this.undo()),
       ),
     );
 
@@ -210,6 +224,7 @@ class RegexBuilderPlugin {
 
   private apply(method: string, ...args: unknown[]): void {
     this.presetOverride = null;
+    const prev = this.builder;
     const surface = this.builder as unknown as Record<string, (...a: unknown[]) => RegexBuilder>;
     try {
       this.builder = surface[method](...args);
@@ -220,7 +235,67 @@ class RegexBuilderPlugin {
       }
       throw err;
     }
+    this.history.push(prev);
+    if (this.history.length > 50) this.history.shift();
     this.render();
+  }
+
+  private undo(): void {
+    const prev = this.history.pop();
+    if (prev === undefined) return;
+    this.builder = prev;
+    this.presetOverride = null;
+    this.render();
+  }
+
+  private loadSelection(): void {
+    const ed = (window as unknown as {
+      editorManager?: {
+        editor?: { getSelection?: () => string; getSelectedText?: () => string };
+      };
+    }).editorManager?.editor;
+    const sel = ed?.getSelection?.() ?? ed?.getSelectedText?.();
+    if (typeof sel === "string" && sel.trim()) {
+      this.presetOverride = sel.trim();
+      this.render();
+    } else {
+      this.errEl.textContent = "no selection";
+    }
+  }
+
+  private restoreState(): void {
+    try {
+      const raw = localStorage.getItem(STATE_KEY);
+      if (!raw) return;
+      const state: unknown = JSON.parse(raw);
+      if (typeof state !== "object" || state === null) return;
+      const s = state as Record<string, unknown>;
+      if (typeof s.lastGood === "string" && s.lastGood) this.presetOverride = s.lastGood;
+      if (typeof s.test === "string") this.testInput.value = s.test;
+      if (typeof s.i === "boolean") this.flagI.checked = s.i;
+      if (typeof s.m === "boolean") this.flagM.checked = s.m;
+      if (typeof s.s === "boolean") this.flagS.checked = s.s;
+    } catch {
+      /* WebView may deny localStorage — ignore */
+    }
+  }
+
+  private scheduleSave(): void {
+    if (this.saveTimer !== null) clearTimeout(this.saveTimer);
+    this.saveTimer = setTimeout(() => {
+      this.saveTimer = null;
+      try {
+        localStorage.setItem(STATE_KEY, JSON.stringify({
+          lastGood: this.currentPattern(),
+          test: this.testInput.value,
+          i: this.flagI.checked,
+          m: this.flagM.checked,
+          s: this.flagS.checked,
+        }));
+      } catch {
+        /* WebView may deny localStorage — ignore */
+      }
+    }, 300);
   }
 
   private currentPattern(): string {
@@ -265,6 +340,7 @@ class RegexBuilderPlugin {
   }
 
   private runTester(): void {
+    this.scheduleSave();
     const text = this.testInput.value;
     if (!text || !this.currentPattern()) {
       this.resultsEl.textContent = "";
@@ -293,7 +369,8 @@ class RegexBuilderPlugin {
       count++;
     }
     highlighted += escapeHtml(text.slice(cursor));
-    this.resultsEl.innerHTML = highlighted + "\n" + escapeHtml(lines.join("\n"));
+    const summary = count === 0 ? "no matches" : `${count} match${count === 1 ? "" : "es"}`;
+    this.resultsEl.innerHTML = `${escapeHtml(summary)}\n${highlighted}\n${escapeHtml(lines.join("\n"))}`;
   }
 
   private async copy(text: string): Promise<void> {
