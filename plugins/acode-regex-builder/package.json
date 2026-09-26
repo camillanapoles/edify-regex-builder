@@ -1,6 +1,6 @@
 {
   "name": "acode-regex-builder",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "private": true,
   "description": "Acode plugin: fluent regex builder + tester ported from the edify Python library",
   "main": "dist/main.js",

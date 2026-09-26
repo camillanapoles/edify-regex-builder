@@ -1,5 +1,12 @@
 # Changelogs
 
+## 0.1.3
+- Sidebar icon added (`icon.png`, ships in the zip) — fixes Acode's
+  `Failed to resolve plugin icon` error in the sidebar.
+- Renamed to "Regex Builder" with new plugin id `acode.regex-builder`.
+  NOTE: Acode treats this as a NEW plugin — remove the previously installed
+  `acode.edify.regexbuilder` copy before/after installing this one.
+
 ## 0.1.2
 - Packaging fix: bundle as IIFE (matches the official acode-plugin template's
   esbuild `format: "iife"`) so Acode can inject `main.js` as a classic script;
