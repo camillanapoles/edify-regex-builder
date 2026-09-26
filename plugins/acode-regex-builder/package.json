@@ -1,12 +1,12 @@
 {
   "name": "acode-regex-builder",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": true,
   "description": "Acode plugin: fluent regex builder + tester ported from the edify Python library",
   "main": "dist/main.js",
   "type": "module",
   "scripts": {
-    "build": "bun build src/main.ts --target browser --minify --outfile dist/main.js",
+    "build": "bun build src/main.ts --target browser --format=iife --minify --outfile dist/main.js",
     "pack": "sh tools/pack.sh"
   },
   "browserslist": "cover 100%,not android < 5"

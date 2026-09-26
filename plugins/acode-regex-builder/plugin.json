@@ -3,7 +3,7 @@
   "id": "acode.edify.regexbuilder",
   "name": "Regex Builder (edify)",
   "main": "main.js",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "readme": "readme.md",
   "changelogs": "changelogs.md",
   "author": {

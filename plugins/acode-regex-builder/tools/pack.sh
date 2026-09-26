@@ -3,7 +3,7 @@
 set -eu
 cd "$(dirname "$0")/.."
 
-bun build src/main.ts --target browser --minify --outfile dist/main.js
+bun build src/main.ts --target browser --format=iife --minify --outfile dist/main.js
 
 rm -f dist.zip
 rm -rf .stage
